@@ -5,10 +5,12 @@ export const apiService = {
   // Fetch vendors by Product ID
   getVendorsByProductId: async (productId) => {
     try {
+      console.log("I am here");
       const response = await fetch(`${API_BASE_URL}/vendors?productId=${productId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch vendors');
       }
+      // console.log("The data is:", response.json());
       return await response.json();
     } catch (error) {
       console.error('Error fetching vendors:', error);
@@ -16,10 +18,10 @@ export const apiService = {
     }
   },
 
-  // Fetch all ship codes
-  getShipCodes: async () => {
+  // Fetch all distimct ship codes for a Product ID
+  getShipCodes: async (productId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/ship-codes`);
+      const response = await fetch(`${API_BASE_URL}/ship-codes?productId=${productId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch ship codes');
       }
@@ -31,9 +33,9 @@ export const apiService = {
   },
 
   // Fetch vendor codes by ship code
-  getVendorCodesByShipCode: async (shipCode) => {
+  getVendorCodesByShipCode: async (productId, shipCode) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/vendor-codes?shipCode=${shipCode}`);
+      const response = await fetch(`${API_BASE_URL}/vendor-codes?productId=${productId}?shipCode=${shipCode}`);
       if (!response.ok) {
         throw new Error('Failed to fetch vendor codes');
       }

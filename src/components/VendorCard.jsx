@@ -11,40 +11,31 @@ function VendorCard({ vendor, productId, onCommentAdded }) {
 
       <div className="vendor-details">
         <div className="detail-row">
-          <span className="label">Contact Email:</span>
-          <span className="value">{vendor.email || 'N/A'}</span>
+          <span className="label">Product Name:</span>
+          <span className="value">{vendor.ProductName || 'N/A'}</span>
         </div>
-        <div className="detail-row">
-          <span className="label">Phone:</span>
-          <span className="value">{vendor.phone || 'N/A'}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Location:</span>
-          <span className="value">{vendor.location || 'N/A'}</span>
-        </div>
-        <div className="detail-row">
-          <span className="label">Status:</span>
-          <span className={`status ${vendor.status?.toLowerCase()}`}>
-            {vendor.status || 'Active'}
-          </span>
-        </div>
-
-        {/* New fields */}
         <div className="detail-row">
           <span className="label">Ship Code:</span>
-          <span className="value">{vendor.shipCode || 'N/A'}</span>
+          <span className="value">{vendor.ShipCode || 'N/A'}</span>
         </div>
         <div className="detail-row">
           <span className="label">Ship Name:</span>
-          <span className="value">{vendor.shipName || 'N/A'}</span>
+          <span className="value">{vendor.ShipName || 'N/A'}</span>
         </div>
         <div className="detail-row">
           <span className="label">Vendor Code:</span>
-          <span className="value">{vendor.vendorCode || 'N/A'}</span>
+          <span className="value">{vendor.VendorCode || 'N/A'}</span>
         </div>
+
+        {/* New fields */}
+
         <div className="detail-row">
           <span className="label">Region Code:</span>
           <span className="value">{vendor.regionCode || 'N/A'}</span>
+        </div>
+        <div className="detail-row">
+          <span className="label">Region Name:</span>
+          <span className="value">{vendor.RegionName || 'N/A'}</span>
         </div>
       </div>
 

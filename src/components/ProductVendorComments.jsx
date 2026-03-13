@@ -20,7 +20,7 @@ function ProductVendorComments() {
     const loadShipCodes = async () => {
       try {
         setIsLoadingFilters(true);
-        const data = await apiService.getShipCodes();
+        const data = await apiService.getShipCodes(productId);
         setShipCodes(Array.isArray(data) ? data : data.shipCodes || []);
       } catch (err) {
         console.error('Error loading ship codes:', err);
@@ -30,7 +30,7 @@ function ProductVendorComments() {
     };
 
     loadShipCodes();
-  }, []);
+  }, [setProductId, productId]);
 
   // Load vendor codes when ship codes selection changes
   useEffect(() => {
@@ -47,7 +47,7 @@ function ProductVendorComments() {
         const allVendorCodes = new Set();
 
         for (const shipCode of shipCodeArray) {
-          const data = await apiService.getVendorCodesByShipCode(shipCode);
+          const data = await apiService.getVendorCodesByShipCode(productId, shipCode);
           const codes = Array.isArray(data) ? data : data.vendorCodes || [];
           codes.forEach(code => allVendorCodes.add(code));
         }
