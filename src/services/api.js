@@ -2,6 +2,20 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const apiService = {
+  // Fetch product details by Product ID
+  getProductDetails: async (productId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/product-details?productId=${productId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch product details');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching product details:', error);
+      throw error;
+    }
+  },
+
   // Fetch vendors by Product ID
   getVendorsByProductId: async (productId) => {
     try {
@@ -35,7 +49,7 @@ export const apiService = {
   // Fetch vendor codes by ship code
   getVendorCodesByShipCode: async (productId, shipCode) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/vendor-codes?productId=${productId}?shipCode=${shipCode}`);
+      const response = await fetch(`${API_BASE_URL}/vendor-codes?productId=${productId}&shipCode=${shipCode}`);
       if (!response.ok) {
         throw new Error('Failed to fetch vendor codes');
       }

@@ -1,68 +1,21 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import VendorCard from './VendorCard';
+import VendorCommentBox from './VendorCommentBox';
 import '../styles/ProductVendorComments.css';
 
 function ProductVendorComments() {
   const [productId, setProductId] = useState('');
-  const [vendors, setVendors] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [productDetails, setProductDetails] = useState(null);
+  const [shipCodes, setShipCodes] = useState([]);
+  const [expandedShipCode, setExpandedShipCode] = useState(null);
+  const [vendorCodesByShipCode, setVendorCodesByShipCode] = useState({});
+  const [selectedVendorCode, setSelectedVendorCode] = useState({});
+  
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+  const [isLoadingShipCodes, setIsLoadingShipCodes] = useState(false);
+  const [isLoadingVendorCodes, setIsLoadingVendorCodes] = useState({});
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
-  const [shipCodes, setShipCodes] = useState([]);
-  const [selectedShipCodes, setSelectedShipCodes] = useState(new Set());
-  const [vendorCodes, setVendorCodes] = useState([]);
-  const [selectedVendorCodes, setSelectedVendorCodes] = useState(new Set());
-  const [isLoadingFilters, setIsLoadingFilters] = useState(false);
-
-  // Load ship codes on component mount
-  useEffect(() => {
-    const loadShipCodes = async () => {
-      try {
-        setIsLoadingFilters(true);
-        const data = await apiService.getShipCodes(productId);
-        setShipCodes(Array.isArray(data) ? data : data.shipCodes || []);
-      } catch (err) {
-        console.error('Error loading ship codes:', err);
-      } finally {
-        setIsLoadingFilters(false);
-      }
-    };
-
-    loadShipCodes();
-  }, [setProductId, productId]);
-
-  // Load vendor codes when ship codes selection changes
-  useEffect(() => {
-    const loadVendorCodes = async () => {
-      if (selectedShipCodes.size === 0) {
-        setVendorCodes([]);
-        setSelectedVendorCodes(new Set());
-        return;
-      }
-
-      try {
-        setIsLoadingFilters(true);
-        const shipCodeArray = Array.from(selectedShipCodes);
-        const allVendorCodes = new Set();
-
-        for (const shipCode of shipCodeArray) {
-          const data = await apiService.getVendorCodesByShipCode(productId, shipCode);
-          const codes = Array.isArray(data) ? data : data.vendorCodes || [];
-          codes.forEach(code => allVendorCodes.add(code));
-        }
-
-        setVendorCodes(Array.from(allVendorCodes).sort());
-        setSelectedVendorCodes(new Set());
-      } catch (err) {
-        console.error('Error loading vendor codes:', err);
-      } finally {
-        setIsLoadingFilters(false);
-      }
-    };
-
-    loadVendorCodes();
-  }, [selectedShipCodes]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -72,224 +25,219 @@ function ProductVendorComments() {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoadingProduct(true);
+    setIsLoadingShipCodes(true);
     setError('');
     setSearched(true);
+    setProductDetails(null);
+    setShipCodes([]);
+    setExpandedShipCode(null);
+    setVendorCodesByShipCode({});
 
     try {
-      const data = await apiService.getVendorsByProductId(productId);
-      setVendors(Array.isArray(data) ? data : data.vendors || []);
+      // Fetch product details
+      const details = await apiService.getProductDetails(productId);
+      setProductDetails(details);
 
-      if (!data || data.length === 0 || (data.vendors && data.vendors.length === 0)) {
-        setError('No vendors found for this Product ID');
-      }
+      // Fetch ship codes
+      const codes = await apiService.getShipCodes(productId);
+      setShipCodes(Array.isArray(codes) ? codes : []);
     } catch (err) {
-      setError(err.message || 'Failed to fetch vendors');
-      setVendors([]);
+      setError(err.message || 'Failed to fetch product data');
+      setProductDetails(null);
+      setShipCodes([]);
     } finally {
-      setIsLoading(false);
+      setIsLoadingProduct(false);
+      setIsLoadingShipCodes(false);
     }
   };
 
-  const handleShipCodeToggle = (shipCode) => {
-    const newSet = new Set(selectedShipCodes);
-    if (newSet.has(shipCode)) {
-      newSet.delete(shipCode);
-    } else {
-      newSet.add(shipCode);
+  const handleShipCodeExpand = async (shipCode) => {
+    if (expandedShipCode === shipCode) {
+      setExpandedShipCode(null);
+      return;
     }
-    setSelectedShipCodes(newSet);
-  };
 
-  const handleShipCodeSelectAll = (checked) => {
-    if (checked) {
-      setSelectedShipCodes(new Set(shipCodes.map(s => s.code || s)));
-    } else {
-      setSelectedShipCodes(new Set());
-    }
-  };
-
-  const handleVendorCodeToggle = (vendorCode) => {
-    const newSet = new Set(selectedVendorCodes);
-    if (newSet.has(vendorCode)) {
-      newSet.delete(vendorCode);
-    } else {
-      newSet.add(vendorCode);
-    }
-    setSelectedVendorCodes(newSet);
-  };
-
-  const handleVendorCodeSelectAll = (checked) => {
-    if (checked) {
-      setSelectedVendorCodes(new Set(vendorCodes));
-    } else {
-      setSelectedVendorCodes(new Set());
+    setExpandedShipCode(shipCode);
+    
+    // Fetch vendor codes if not already loaded
+    if (!vendorCodesByShipCode[shipCode]) {
+      setIsLoadingVendorCodes(prev => ({ ...prev, [shipCode]: true }));
+      try {
+        const codes = await apiService.getVendorCodesByShipCode(productId, shipCode);
+        setVendorCodesByShipCode(prev => ({
+          ...prev,
+          [shipCode]: Array.isArray(codes) ? codes : []
+        }));
+      } catch (err) {
+        console.error('Error fetching vendor codes:', err);
+        setVendorCodesByShipCode(prev => ({
+          ...prev,
+          [shipCode]: []
+        }));
+      } finally {
+        setIsLoadingVendorCodes(prev => ({ ...prev, [shipCode]: false }));
+      }
     }
   };
 
-  const filteredVendors = vendors.filter(vendor => {
-    // If no filters are applied, show all vendors
-    if (selectedShipCodes.size === 0 && selectedVendorCodes.size === 0) {
-      return true;
-    }
+  const handleVendorCodeSelect = (shipCode, vendorCode) => {
+    setSelectedVendorCode(prev => ({
+      ...prev,
+      [shipCode]: vendorCode
+    }));
+  };
 
-    // Check ship code filter
-    if (selectedShipCodes.size > 0 && !selectedShipCodes.has(vendor.shipCode)) {
-      return false;
-    }
+  const handleCommentAdded = () => {
+    // Reset vendor code selection after comment is added
+    setSelectedVendorCode(prev => ({
+      ...prev,
+      [expandedShipCode]: null
+    }));
+    // Optionally show a success message or refresh
+  };
 
-    // Check vendor code filter
-    if (selectedVendorCodes.size > 0 && !selectedVendorCodes.has(vendor.vendorCode)) {
-      return false;
-    }
-
-    return true;
-  });
-
-  const handleCommentAdded = (newComment) => {
-    // You can use this to update UI if needed
-    console.log('Comment added:', newComment);
+  const handleClearSearch = () => {
+    setProductId('');
+    setProductDetails(null);
+    setShipCodes([]);
+    setExpandedShipCode(null);
+    setVendorCodesByShipCode({});
+    setSelectedVendorCode({});
+    setError('');
+    setSearched(false);
   };
 
   return (
     <div className="product-vendor-comments-container">
+      {/* Header */}
       <div className="header-section">
         <h1>Vendor Management System</h1>
-        <p>Search for vendors by Product ID and add comments</p>
       </div>
 
-      <form onSubmit={handleSearch} className="search-form">
-        <div className="input-group">
+      {/* Search Box - Compact */}
+      <form onSubmit={handleSearch} className="search-form-compact">
+        <div className="input-group-compact">
           <input
             type="text"
             value={productId}
             onChange={(e) => setProductId(e.target.value)}
             placeholder="Enter Product ID (e.g., PROD-001)"
-            className="product-id-input"
-            disabled={isLoading}
+            className="product-id-input-compact"
+            disabled={isLoadingProduct}
           />
           <button
             type="submit"
-            disabled={isLoading || !productId.trim()}
-            className="search-button"
+            disabled={isLoadingProduct || !productId.trim()}
+            className="search-button-compact"
           >
-            {isLoading ? 'Searching...' : 'Search Vendors'}
+            {isLoadingProduct ? 'Searching...' : 'Search'}
           </button>
         </div>
       </form>
 
+      {/* Error Message */}
       {error && <div className="error-banner">{error}</div>}
 
-      {searched && vendors.length > 0 && (
-        <div className="results-section">
-          <div className="results-header">
-            <h2>Found {vendors.length} Vendor(s)</h2>
-            <button
-              className="reset-button"
-              onClick={() => {
-                setProductId('');
-                setVendors([]);
-                setSearched(false);
-                setError('');
-                setSelectedShipCodes(new Set());
-                setSelectedVendorCodes(new Set());
-              }}
-            >
-              Clear Search
-            </button>
-          </div>
-
-          {/* Filters Section */}
-          <div className="filters-section">
-            <div className="filter-group">
-              <h3>Filter by Ship Code</h3>
-              {isLoadingFilters ? (
-                <p className="filter-loading">Loading ship codes...</p>
-              ) : shipCodes.length > 0 ? (
-                <div className="filter-options">
-                  <label className="filter-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedShipCodes.size === shipCodes.length}
-                      onChange={(e) => handleShipCodeSelectAll(e.target.checked)}
-                    />
-                    <span>Select All</span>
-                  </label>
-                  {shipCodes.map((shipCode) => {
-                    const code = shipCode.code || shipCode;
-                    return (
-                      <label key={code} className="filter-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={selectedShipCodes.has(code)}
-                          onChange={() => handleShipCodeToggle(code)}
-                        />
-                        <span>{code}</span>
-                      </label>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="no-filters">No ship codes available</p>
-              )}
+      {/* Product Details - Compact */}
+      {searched && productDetails && (
+        <div className="product-details-section">
+          <div className="product-details-row">
+            <div className="detail-item">
+              <label>Product Name:</label>
+              <span>{productDetails.ProductName || 'N/A'}</span>
             </div>
+            <div className="detail-item">
+              <label>Category:</label>
+              <span>{productDetails.Category || 'N/A'}</span>
+            </div>
+            <div className="detail-item">
+              <label>Department:</label>
+              <span>{productDetails.Department || 'N/A'}</span>
+            </div>
+            <div className="detail-item">
+              <label>Type:</label>
+              <span>{productDetails.ProductTypeName || 'N/A'}</span>
+            </div>
+          </div>
+          <button className="clear-search-button" onClick={handleClearSearch}>
+            Clear Search
+          </button>
+        </div>
+      )}
 
-            {selectedShipCodes.size > 0 && (
-              <div className="filter-group">
-                <h3>Filter by Vendor Code</h3>
-                {isLoadingFilters ? (
-                  <p className="filter-loading">Loading vendor codes...</p>
-                ) : vendorCodes.length > 0 ? (
-                  <div className="filter-options">
-                    <label className="filter-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedVendorCodes.size === vendorCodes.length}
-                        onChange={(e) => handleVendorCodeSelectAll(e.target.checked)}
-                      />
-                      <span>Select All</span>
-                    </label>
-                    {vendorCodes.map((vendorCode) => (
-                      <label key={vendorCode} className="filter-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={selectedVendorCodes.has(vendorCode)}
-                          onChange={() => handleVendorCodeToggle(vendorCode)}
-                        />
-                        <span>{vendorCode}</span>
-                      </label>
-                    ))}
+      {/* Ship Codes as Expandable Cards */}
+      {searched && shipCodes.length > 0 && (
+        <div className="ship-codes-section">
+          <h3>Ship Codes</h3>
+          <div className="ship-codes-list">
+            {shipCodes.map((shipCode) => (
+              <div key={shipCode} className="ship-code-card">
+                <div 
+                  className={`ship-code-header ${expandedShipCode === shipCode ? 'expanded' : ''}`}
+                  onClick={() => handleShipCodeExpand(shipCode)}
+                >
+                  <div className="ship-code-title">
+                    <span className="ship-code-icon">
+                      {expandedShipCode === shipCode ? '▼' : '▶'}
+                    </span>
+                    <span className="ship-code-name">{shipCode}</span>
                   </div>
-                ) : (
-                  <p className="no-filters">No vendor codes available</p>
+                </div>
+
+                {/* Expanded Content */}
+                {expandedShipCode === shipCode && (
+                  <div className="ship-code-content">
+                    {isLoadingVendorCodes[shipCode] ? (
+                      <p className="loading-text">Loading vendor codes...</p>
+                    ) : (
+                      <>
+                        {/* Vendor Code Filter */}
+                        <div className="vendor-code-filter">
+                          <label>Select Vendor Code:</label>
+                          <select
+                            value={selectedVendorCode[shipCode] || ''}
+                            onChange={(e) => handleVendorCodeSelect(shipCode, e.target.value)}
+                            className="vendor-code-select"
+                          >
+                            <option value="">-- Choose a Vendor Code --</option>
+                            {vendorCodesByShipCode[shipCode] && vendorCodesByShipCode[shipCode].length > 0 ? (
+                              vendorCodesByShipCode[shipCode].map((vendorCode) => (
+                                <option key={vendorCode} value={vendorCode}>
+                                  {vendorCode}
+                                </option>
+                              ))
+                            ) : (
+                              <option disabled>No vendor codes available</option>
+                            )}
+                          </select>
+                        </div>
+
+                        {/* Comment Box for Selected Vendor Code */}
+                        {selectedVendorCode[shipCode] && (
+                          <div className="comment-section">
+                            <VendorCommentBox
+                              productId={productId}
+                              shipCode={shipCode}
+                              vendorCode={selectedVendorCode[shipCode]}
+                              onCommentAdded={handleCommentAdded}
+                            />
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-
-          {/* Results */}
-          <div className="vendors-grid">
-            {filteredVendors.length > 0 ? (
-              filteredVendors.map((vendor) => (
-                <VendorCard
-                  key={vendor.id}
-                  vendor={vendor}
-                  productId={productId}
-                  onCommentAdded={handleCommentAdded}
-                />
-              ))
-            ) : (
-              <div className="no-results">
-                <p>No vendors match the selected filters.</p>
-              </div>
-            )}
+            ))}
           </div>
         </div>
       )}
 
-      {searched && vendors.length === 0 && !error && (
-        <div className="no-results">
-          <p>No vendors found. Try a different Product ID.</p>
+      {/* No Results Message */}
+      {searched && shipCodes.length === 0 && !error && (
+        <div className="no-results-message">
+          <p>No ship codes found for this Product ID.</p>
         </div>
       )}
     </div>

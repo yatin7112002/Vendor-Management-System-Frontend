@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { apiService } from '../services/api';
 import '../styles/VendorCommentBox.css';
 
-function VendorCommentBox({ vendor, productId, onCommentAdded }) {
+function VendorCommentBox({ productId, shipCode, vendorCode, onCommentAdded }) {
   const [comment, setComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -25,16 +26,17 @@ function VendorCommentBox({ vendor, productId, onCommentAdded }) {
     setSuccess('');
 
     try {
-      const { apiService } = await import('../services/api');
-      const response = await apiService.addCommentToVendor(vendor.id, productId, {
+      const response = await apiService.addCommentToVendor(vendorCode, productId, {
         text: comment,
+        shipCode: shipCode,
+        vendorCode: vendorCode,
         timestamp: new Date().toISOString(),
       });
 
       setComment('');
       setSuccess('Comment added successfully!');
       
-      // Call callback to refresh comments if needed
+      // Call callback to refresh UI
       if (onCommentAdded) {
         onCommentAdded(response);
       }
@@ -50,6 +52,7 @@ function VendorCommentBox({ vendor, productId, onCommentAdded }) {
 
   return (
     <div className="comment-box">
+      <h4>Add Comment for {vendorCode}</h4>
       <div className="comment-input-container">
         <textarea
           value={comment}
@@ -58,14 +61,14 @@ function VendorCommentBox({ vendor, productId, onCommentAdded }) {
           placeholder="Add a comment... (Press Enter to submit, Shift+Enter for new line)"
           disabled={isLoading}
           className="comment-textarea"
-          rows="2"
+          rows="3"
         />
         <button
           onClick={submitComment}
           disabled={isLoading || !comment.trim()}
           className="comment-button"
         >
-          {isLoading ? 'Saving...' : 'Add Comment'}
+          {isLoading ? 'Saving...' : 'Submit Comment'}
         </button>
       </div>
 
