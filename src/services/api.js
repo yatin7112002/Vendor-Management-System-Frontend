@@ -60,6 +60,20 @@ export const apiService = {
     }
   },
 
+  // Fetch all vendor data for a product (includes all details)
+  getVendorDataByProductId: async (productId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/vendors?productId=${productId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch vendor data');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching vendor data:', error);
+      throw error;
+    }
+  },
+
   // Add comment to vendor
   addCommentToVendor: async (vendorId, productId, commentData) => {
     try {

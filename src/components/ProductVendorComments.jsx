@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '../services/api';
-import VendorCommentBox from './VendorCommentBox';
+import VendorDetailsModal from './VendorDetailsModal';
 import '../styles/ProductVendorComments.css';
 
 function ProductVendorComments() {
   const [productId, setProductId] = useState('');
   const [productDetails, setProductDetails] = useState(null);
+  const [allVendorData, setAllVendorData] = useState([]);
   const [shipCodes, setShipCodes] = useState([]);
   const [expandedShipCode, setExpandedShipCode] = useState(null);
   const [vendorCodesByShipCode, setVendorCodesByShipCode] = useState({});
   const [selectedVendorCode, setSelectedVendorCode] = useState({});
+  const [selectedVendorData, setSelectedVendorData] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   
   const [isLoadingProduct, setIsLoadingProduct] = useState(false);
   const [isLoadingShipCodes, setIsLoadingShipCodes] = useState(false);
@@ -33,19 +36,30 @@ function ProductVendorComments() {
     setShipCodes([]);
     setExpandedShipCode(null);
     setVendorCodesByShipCode({});
+    setAllVendorData([]);
 
     try {
       // Fetch product details
       const details = await apiService.getProductDetails(productId);
       setProductDetails(details);
 
-      // Fetch ship codes
-      const codes = await apiService.getShipCodes(productId);
-      setShipCodes(Array.isArray(codes) ? codes : []);
+      // Fetch all vendor data
+      const vendorData = await apiService.getVendorDataByProductId(productId);
+      setAllVendorData(Array.isArray(vendorData) ? vendorData : []);
+
+      // Extract unique ship codes
+      const codes = new Set();
+      if (Array.isArray(vendorData)) {
+        vendorData.forEach(item => {
+          if (item.ShipCode) codes.add(item.ShipCode);
+        });
+      }
+      setShipCodes(Array.from(codes).sort());
     } catch (err) {
       setError(err.message || 'Failed to fetch product data');
       setProductDetails(null);
       setShipCodes([]);
+      setAllVendorData([]);
     } finally {
       setIsLoadingProduct(false);
       setIsLoadingShipCodes(false);
@@ -60,17 +74,24 @@ function ProductVendorComments() {
 
     setExpandedShipCode(shipCode);
     
-    // Fetch vendor codes if not already loaded
+    // Filter vendor codes for this ship code from allVendorData
     if (!vendorCodesByShipCode[shipCode]) {
       setIsLoadingVendorCodes(prev => ({ ...prev, [shipCode]: true }));
       try {
-        const codes = await apiService.getVendorCodesByShipCode(productId, shipCode);
+        // Get unique vendor codes for this ship code
+        const vendorCodesForShip = new Set();
+        allVendorData.forEach(item => {
+          if (item.ShipCode === shipCode && item.VendorCode) {
+            vendorCodesForShip.add(item.VendorCode);
+          }
+        });
+        
         setVendorCodesByShipCode(prev => ({
           ...prev,
-          [shipCode]: Array.isArray(codes) ? codes : []
+          [shipCode]: Array.from(vendorCodesForShip).sort()
         }));
       } catch (err) {
-        console.error('Error fetching vendor codes:', err);
+        console.error('Error processing vendor codes:', err);
         setVendorCodesByShipCode(prev => ({
           ...prev,
           [shipCode]: []
@@ -82,19 +103,20 @@ function ProductVendorComments() {
   };
 
   const handleVendorCodeSelect = (shipCode, vendorCode) => {
+    // Find the vendor data matching this ship code and vendor code
+    const vendorData = allVendorData.find(
+      item => item.ShipCode === shipCode && item.VendorCode === vendorCode
+    );
+    
     setSelectedVendorCode(prev => ({
       ...prev,
       [shipCode]: vendorCode
     }));
-  };
-
-  const handleCommentAdded = () => {
-    // Reset vendor code selection after comment is added
-    setSelectedVendorCode(prev => ({
-      ...prev,
-      [expandedShipCode]: null
-    }));
-    // Optionally show a success message or refresh
+    
+    if (vendorData) {
+      setSelectedVendorData(vendorData);
+      setShowModal(true);
+    }
   };
 
   const handleClearSearch = () => {
@@ -104,6 +126,8 @@ function ProductVendorComments() {
     setExpandedShipCode(null);
     setVendorCodesByShipCode({});
     setSelectedVendorCode({});
+    setSelectedVendorData(null);
+    setShowModal(false);
     setError('');
     setSearched(false);
   };
@@ -139,10 +163,10 @@ function ProductVendorComments() {
       {/* Error Message */}
       {error && <div className="error-banner">{error}</div>}
 
-      {/* Product Details - Compact */}
+      {/* Product Details - Horizontal Layout */}
       {searched && productDetails && (
         <div className="product-details-section">
-          <div className="product-details-row">
+          <div className="product-details-grid">
             <div className="detail-item">
               <label>Product Name:</label>
               <span>{productDetails.ProductName || 'N/A'}</span>
@@ -156,8 +180,18 @@ function ProductVendorComments() {
               <span>{productDetails.Department || 'N/A'}</span>
             </div>
             <div className="detail-item">
+              <label>Sub Category:</label>
+              <span>{productDetails.SubCategory || 'N/A'}</span>
+            </div>
+            <div className="detail-item">
               <label>Type:</label>
               <span>{productDetails.ProductTypeName || 'N/A'}</span>
+            </div>
+            <div className="detail-item">
+              <label>Status:</label>
+              <span className={`status-badge ${productDetails.Status ? 'active' : 'inactive'}`}>
+                {productDetails.Status ? 'Active' : 'Inactive'}
+              </span>
             </div>
           </div>
           <button className="clear-search-button" onClick={handleClearSearch}>
@@ -191,40 +225,25 @@ function ProductVendorComments() {
                     {isLoadingVendorCodes[shipCode] ? (
                       <p className="loading-text">Loading vendor codes...</p>
                     ) : (
-                      <>
-                        {/* Vendor Code Filter */}
-                        <div className="vendor-code-filter">
-                          <label>Select Vendor Code:</label>
-                          <select
-                            value={selectedVendorCode[shipCode] || ''}
-                            onChange={(e) => handleVendorCodeSelect(shipCode, e.target.value)}
-                            className="vendor-code-select"
-                          >
-                            <option value="">-- Choose a Vendor Code --</option>
-                            {vendorCodesByShipCode[shipCode] && vendorCodesByShipCode[shipCode].length > 0 ? (
-                              vendorCodesByShipCode[shipCode].map((vendorCode) => (
-                                <option key={vendorCode} value={vendorCode}>
-                                  {vendorCode}
-                                </option>
-                              ))
-                            ) : (
-                              <option disabled>No vendor codes available</option>
-                            )}
-                          </select>
-                        </div>
-
-                        {/* Comment Box for Selected Vendor Code */}
-                        {selectedVendorCode[shipCode] && (
-                          <div className="comment-section">
-                            <VendorCommentBox
-                              productId={productId}
-                              shipCode={shipCode}
-                              vendorCode={selectedVendorCode[shipCode]}
-                              onCommentAdded={handleCommentAdded}
-                            />
-                          </div>
-                        )}
-                      </>
+                      <div className="vendor-code-filter">
+                        <label>Select Vendor Code:</label>
+                        <select
+                          value={selectedVendorCode[shipCode] || ''}
+                          onChange={(e) => handleVendorCodeSelect(shipCode, e.target.value)}
+                          className="vendor-code-select"
+                        >
+                          <option value="">-- Choose a Vendor Code --</option>
+                          {vendorCodesByShipCode[shipCode] && vendorCodesByShipCode[shipCode].length > 0 ? (
+                            vendorCodesByShipCode[shipCode].map((vendorCode) => (
+                              <option key={vendorCode} value={vendorCode}>
+                                {vendorCode}
+                              </option>
+                            ))
+                          ) : (
+                            <option disabled>No vendor codes available</option>
+                          )}
+                        </select>
+                      </div>
                     )}
                   </div>
                 )}
@@ -232,6 +251,17 @@ function ProductVendorComments() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Vendor Details Modal */}
+      {showModal && selectedVendorData && (
+        <VendorDetailsModal
+          vendorData={selectedVendorData}
+          productId={productId}
+          shipCode={selectedVendorData.ShipCode}
+          vendorCode={selectedVendorData.VendorCode}
+          onClose={() => setShowModal(false)}
+        />
       )}
 
       {/* No Results Message */}
