@@ -51,7 +51,7 @@ function VendorCommentBox({ productId, shipCode, vendorCode, commentName, onComm
 
   return (
     <div className="comment-box">
-      <h4>Add Notes for {commentName}</h4>
+      <h4>Add notes for {commentName}</h4>
       <div className="comment-input-container">
         <textarea
           value={comment}
