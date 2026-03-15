@@ -134,11 +134,6 @@ function ProductVendorComments() {
 
   return (
     <div className="product-vendor-comments-container">
-      {/* Header */}
-      <div className="header-section">
-        <h1>Vendor Management System</h1>
-      </div>
-
       {/* Search Box - Compact */}
       <form onSubmit={handleSearch} className="search-form-compact">
         <div className="input-group-compact">
