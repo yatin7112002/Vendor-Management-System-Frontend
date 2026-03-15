@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { apiService } from '../services/api';
 import '../styles/VendorCommentBox.css';
 
-function VendorCommentBox({ productId, shipCode, vendorCode, onCommentAdded }) {
+function VendorCommentBox({ productId, shipCode, vendorCode, commentName, onCommentAdded }) {
   const [comment, setComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,10 +26,9 @@ function VendorCommentBox({ productId, shipCode, vendorCode, onCommentAdded }) {
     setSuccess('');
 
     try {
-      const response = await apiService.addCommentToVendor(vendorCode, productId, {
+      const response = await apiService.addCommentToVendor(vendorCode, productId, shipCode, {
         text: comment,
-        shipCode: shipCode,
-        vendorCode: vendorCode,
+        commentName: commentName,
         timestamp: new Date().toISOString(),
       });
 
@@ -52,7 +51,7 @@ function VendorCommentBox({ productId, shipCode, vendorCode, onCommentAdded }) {
 
   return (
     <div className="comment-box">
-      <h4>Add Comment for {vendorCode}</h4>
+      <h4>Add Notes for {commentName}</h4>
       <div className="comment-input-container">
         <textarea
           value={comment}

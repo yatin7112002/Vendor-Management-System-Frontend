@@ -230,6 +230,7 @@ function ProductVendorComments() {
                         <select
                           value={selectedVendorCode[shipCode] || ''}
                           onChange={(e) => handleVendorCodeSelect(shipCode, e.target.value)}
+                          onClick={(e) => handleVendorCodeSelect(shipCode, e.target.value)}
                           className="vendor-code-select"
                         >
                           <option value="">-- Choose a Vendor Code --</option>

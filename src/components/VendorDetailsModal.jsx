@@ -80,6 +80,34 @@ function VendorDetailsModal({ vendorData, productId, shipCode, vendorCode, onClo
                 productId={productId}
                 shipCode={shipCode}
                 vendorCode={vendorCode}
+                commentName='quality_issue'
+                onCommentAdded={() => {
+                  // Optional: refresh comments or show success message
+                }}
+              />
+              <VendorCommentBox
+                productId={productId}
+                shipCode={shipCode}
+                vendorCode={vendorCode}
+                commentName='general'
+                onCommentAdded={() => {
+                  // Optional: refresh comments or show success message
+                }}
+              />
+              <VendorCommentBox
+                productId={productId}
+                shipCode={shipCode}
+                vendorCode={vendorCode}
+                commentName='summer_season'
+                onCommentAdded={() => {
+                  // Optional: refresh comments or show success message
+                }}
+              />
+              <VendorCommentBox
+                productId={productId}
+                shipCode={shipCode}
+                vendorCode={vendorCode}
+                commentName='winter_season'
                 onCommentAdded={() => {
                   // Optional: refresh comments or show success message
                 }}
