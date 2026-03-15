@@ -1,18 +1,21 @@
 .product-vendor-comments-container {
+  width: 100%;
+  /* max-width: 1200px; */
   margin: 0 auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
   background-color: #f9f9f9;
   min-height: 100vh;
-  width: 100%;
-  padding: 20px 40px;
+  padding: 1.5rem 2rem;
   box-sizing: border-box;
 }
 
+/* HEADER */
+
 .header-section {
   text-align: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
   border-bottom: 2px solid #e0e0e0;
 }
 
@@ -23,20 +26,22 @@
   font-weight: 600;
 }
 
-/* Compact Search Form */
+/* SEARCH FORM */
+
 .search-form-compact {
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
 }
 
 .input-group-compact {
   display: flex;
-  gap: 8px;
-  margin-bottom: 0;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .product-id-input-compact {
-  flex: 1;
-  padding: 10px 12px;
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 0.6rem 0.75rem;
   font-size: 0.95rem;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -55,7 +60,7 @@
 }
 
 .search-button-compact {
-  padding: 10px 20px;
+  padding: 0.6rem 1.2rem;
   background-color: #4a90e2;
   color: white;
   border: none;
@@ -76,48 +81,58 @@
   cursor: not-allowed;
 }
 
-/* Error Banner */
+/* ERROR */
+
 .error-banner {
   background-color: #fee;
   border: 1px solid #f99;
   color: #c33;
-  padding: 12px 15px;
+  padding: 0.8rem 1rem;
   border-radius: 5px;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
   font-weight: 500;
-  font-size: 0.95rem;
 }
 
-/* Product Details Section - Compact */
+/* PRODUCT DETAILS */
+
 .product-details-section {
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 6px;
-  padding: 15px;
-  margin-bottom: 20px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
+/* .product-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+} */
+
 .product-details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 15px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .detail-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 10px;
+  gap: 0.25rem;
+  padding: 0.75rem;
   background-color: #f9f9f9;
   border-radius: 4px;
   border-left: 4px solid #4a90e2;
   align-items: center;
+  text-align: center;
+  min-width: 0;
 }
 
 .detail-item label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #666;
   text-transform: uppercase;
@@ -130,14 +145,14 @@
   font-weight: 500;
 }
 
+/* STATUS BADGE */
+
 .status-badge {
   display: inline-block;
-  padding: 4px 8px;
+  padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.85rem;
   font-weight: 600;
-  text-align: center;
-  width: fit-content;
 }
 
 .status-badge.active {
@@ -152,42 +167,45 @@
   border: 1px solid #f5c6cb;
 }
 
+/* CLEAR BUTTON */
+
 .clear-search-button {
   background-color: #e74c3c;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 0.45rem 1rem;
   border-radius: 5px;
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.3s;
   display: block;
-  margin: 10px auto ;
+  margin: 0.75rem auto;
 }
 
 .clear-search-button:hover {
   background-color: #c0392b;
 }
 
-/* Ship Codes Section */
+/* SHIP CODES */
+
 .ship-codes-section {
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
 }
 
 .ship-codes-section h3 {
   font-size: 1.2rem;
   color: #2c3e50;
-  margin: 0 0 15px 0;
+  margin-bottom: 1rem;
   font-weight: 600;
 }
 
 .ship-codes-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0.75rem;
 }
 
-/* Ship Code Card */
+/* CARD */
+
 .ship-code-card {
   background-color: white;
   border: 1px solid #ddd;
@@ -202,21 +220,16 @@
   box-shadow: 0 2px 6px rgba(74, 144, 226, 0.15);
 }
 
-/* Ship Code Header */
+/* HEADER */
+
 .ship-code-header {
-  padding: 12px 15px;
+  padding: 0.75rem 1rem;
   background-color: #f8f8f8;
   border-bottom: 1px solid #e0e0e0;
   cursor: pointer;
-  user-select: none;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background-color 0.3s;
-}
-
-.ship-code-header:hover {
-  background-color: #efefef;
 }
 
 .ship-code-header.expanded {
@@ -227,86 +240,77 @@
 .ship-code-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.6rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #2c3e50;
 }
 
 .ship-code-icon {
   font-size: 0.8rem;
   color: #666;
-  transition: transform 0.3s;
 }
 
 .ship-code-name {
   color: #4a90e2;
 }
 
-/* Ship Code Content */
+/* CONTENT */
+
 .ship-code-content {
-  padding: 15px;
-  background-color: white;
+  padding: 1rem;
 }
 
-.loading-text {
-  color: #666;
-  font-size: 0.95rem;
-  margin: 0;
-}
+/* SELECT */
 
-/* Vendor Code Filter */
 .vendor-code-filter {
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
 }
 
 .vendor-code-filter label {
   display: block;
   font-size: 0.9rem;
   font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 6px;
+  margin-bottom: 0.4rem;
 }
 
 .vendor-code-select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 0.6rem 0.7rem;
   font-size: 0.95rem;
   border: 1px solid #ddd;
   border-radius: 5px;
-  background-color: white;
-  cursor: pointer;
-  transition: border-color 0.3s;
 }
 
 .vendor-code-select:focus {
   outline: none;
   border-color: #4a90e2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
 }
 
-/* Comment Section */
+/* COMMENT */
+
 .comment-section {
-  margin-top: 15px;
-  padding-top: 15px;
+  margin-top: 1rem;
+  padding-top: 1rem;
   border-top: 1px solid #e0e0e0;
 }
 
-/* No Results */
+/* EMPTY STATE */
+
 .no-results-message {
   background-color: #f0f0f0;
   border: 1px dashed #999;
-  padding: 30px;
+  padding: 2rem;
   text-align: center;
   border-radius: 6px;
   color: #666;
-  font-size: 1rem;
 }
 
-/* Responsive Design */
+/* MOBILE */
+
 @media (max-width: 768px) {
+
   .product-vendor-comments-container {
-    padding: 15px;
+    padding: 1rem;
   }
 
   .header-section h1 {
@@ -317,28 +321,12 @@
     flex-direction: column;
   }
 
-  .product-id-input-compact {
-    width: 100%;
-  }
-
   .search-button-compact {
     width: 100%;
   }
 
-  .product-details-row {
+  .product-details-grid {
     grid-template-columns: 1fr;
   }
 
-  .detail-item {
-    padding: 8px 0;
-  }
-
-  .ship-code-card {
-    margin-bottom: 10px;
-  }
-
-  .vendor-code-select {
-    font-size: 16px; /* Prevents zoom on iOS */
-  }
 }
-
