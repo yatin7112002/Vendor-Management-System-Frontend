@@ -1,17 +1,20 @@
 // API service for backend communication
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export const apiService = {
   // Fetch product details by Product ID
   getProductDetails: async (productId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/product-details?productId=${productId}`);
+      const response = await fetch(
+        `${API_BASE_URL}/product-details?productId=${productId}`,
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch product details');
+        throw new Error("Failed to fetch product details");
       }
       return await response.json();
     } catch (error) {
-      console.error('Error fetching product details:', error);
+      console.error("Error fetching product details:", error);
       throw error;
     }
   },
@@ -20,14 +23,16 @@ export const apiService = {
   getVendorsByProductId: async (productId) => {
     try {
       console.log("I am here");
-      const response = await fetch(`${API_BASE_URL}/vendors?productId=${productId}`);
+      const response = await fetch(
+        `${API_BASE_URL}/vendors?productId=${productId}`,
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch vendors');
+        throw new Error("Failed to fetch vendors");
       }
       // console.log("The data is:", response.json());
       return await response.json();
     } catch (error) {
-      console.error('Error fetching vendors:', error);
+      console.error("Error fetching vendors:", error);
       throw error;
     }
   },
@@ -35,13 +40,15 @@ export const apiService = {
   // Fetch all distimct ship codes for a Product ID
   getShipCodes: async (productId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/ship-codes?productId=${productId}`);
+      const response = await fetch(
+        `${API_BASE_URL}/ship-codes?productId=${productId}`,
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch ship codes');
+        throw new Error("Failed to fetch ship codes");
       }
       return await response.json();
     } catch (error) {
-      console.error('Error fetching ship codes:', error);
+      console.error("Error fetching ship codes:", error);
       throw error;
     }
   },
@@ -49,13 +56,15 @@ export const apiService = {
   // Fetch vendor codes by ship code
   getVendorCodesByShipCode: async (productId, shipCode) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/vendor-codes?productId=${productId}&shipCode=${shipCode}`);
+      const response = await fetch(
+        `${API_BASE_URL}/vendor-codes?productId=${productId}&shipCode=${shipCode}`,
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch vendor codes');
+        throw new Error("Failed to fetch vendor codes");
       }
       return await response.json();
     } catch (error) {
-      console.error('Error fetching vendor codes:', error);
+      console.error("Error fetching vendor codes:", error);
       throw error;
     }
   },
@@ -63,53 +72,54 @@ export const apiService = {
   // Fetch all vendor data for a product (includes all details)
   getVendorDataByProductId: async (productId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/vendors?productId=${productId}`);
+      const response = await fetch(
+        `${API_BASE_URL}/vendors?productId=${productId}`,
+      );
       if (!response.ok) {
-        throw new Error('Failed to fetch vendor data');
+        throw new Error("Failed to fetch vendor data");
       }
       return await response.json();
     } catch (error) {
-      console.error('Error fetching vendor data:', error);
+      console.error("Error fetching vendor data:", error);
       throw error;
     }
   },
 
   // Add comment to vendor
-  addCommentToVendor: async (vendorId, productId, commentData) => {
+  addCommentToVendor: async (vendorData, commentData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/comments`, {
-        method: 'POST',
+      const response = await fetch(`${API_BASE_URL}/add-comment-data`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          vendorId,
-          productId,
-          ...commentData,
+          vendorData,
+          commentData,
         }),
       });
       if (!response.ok) {
-        throw new Error('Failed to save comment');
+        throw new Error("Failed to save comment");
       }
       return await response.json();
     } catch (error) {
-      console.error('Error saving comment:', error);
+      console.error("Error saving comment:", error);
       throw error;
     }
   },
 
   // Fetch comments for a vendor (optional - for loading existing comments)
-  getCommentsByVendorId: async (vendorId, productId) => {
+  getCommentsByVendorId: async (vendorCode, shipCode, productCode) => {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/comments?vendorId=${vendorId}&productId=${productId}`
+        `${API_BASE_URL}/get-existing-comments?vendorCode=${vendorCode}&shipCode=${shipCode}&productCode=${productCode}`,
       );
       if (!response.ok) {
-        throw new Error('Failed to fetch comments');
+        throw new Error("Failed to fetch comments");
       }
-      return await response.json();
+      return await response.json().comments;
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      console.error("Error fetching comments:", error);
       throw error;
     }
   },
